@@ -4,10 +4,17 @@
   "description": "A backend at chai aur code ",
   "license": "ISC",
   "author": "pushkar",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
-  "keywords": ["javascript", "chai", "backend"],
+  "keywords": [
+    "javascript",
+    "chai",
+    "backend"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
