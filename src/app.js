@@ -21,5 +21,11 @@ app.use(express.static('public'));
 // It tells Express to parse(convert raw strings sent by client into JavaScript readable objects)
 app.use(cookieParser());
 
+// routes import
+import userRouter from './routes/user.routes.js'
+
+// routes declaration
+app.use('/api/v1/users', userRouter); // activates userRouter and passes control to user.routes.js
+
 
 export {app}    

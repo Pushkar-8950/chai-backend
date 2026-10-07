@@ -48,37 +48,45 @@ const UserSchema = new Schema({
     }
 }, {timestamps: true});
 
+// Runs before saving a user document
 UserSchema.pre("save", async function (next) {
 
+    // If password is not modified, skip hashing
     if(!this.isModified("password")) return next();
 
+    // Converts plain password into a bcrypt hash
     this.password = await bcrypt.hash(this.password, 10);
+
+    //Tells Mongoose: "middleware is finished, continue saving the document"
     next();
 })
 
+// UserSchema.methods.isCorrectPassword -> Adds a method to every User document
 UserSchema.methods.isCorrectPassword = async function(password){
-    return await bcrypt.compare(password, this.password);
+    return await bcrypt.compare(password, this.password); // compares the user's entered password with the stored bcrypt hash and returns true/false
 }
 
 UserSchema.methods.generateAccessToken = function(){
 
-    jwt.sign(
+    return jwt.sign(
+
+        // Payload: The data we want to include in the JWT
         {
             _id:this._id,
             email: this.email,
             username: this.username,
             fullname: this.fullName
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.ACCESS_TOKEN_SECRET, // Secret key used to sign/protect the token
         {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY // Determines how long the token remains valid
         }
     )
 }
 
 UserSchema.methods.generateRefreshToken = function(){
 
-    jwt.sign(
+    return jwt.sign(
         {
             _id:this._id,
     
