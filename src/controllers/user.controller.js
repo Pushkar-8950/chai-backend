@@ -16,16 +16,19 @@ const registerUser = asyncHandler(async (req, res) => {
     // check if user created or not
     // return response
     
+    // Getting user details from frontend
     const {fullName, email, password, userName} = req.body;
-    console.log("email : ", email);
+    console.log("data : ", req.body);
 
+    // Validation - if details are not empty
     if(
         [fullName, email, password, userName].some((fields) => fields?.trim()==="")
     ){
         throw new ApiError(400, "All fields are required");
     }
 
-    const existedUser = User.findOne({
+    // Check if user already exists
+    const existedUser = await User.findOne({
         $or: [{ userName }, { email }]
     });
 
@@ -33,38 +36,49 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409, "User already exist")
     }
 
-    uploadOnCloudinary()
-
+    // Extract path of avatar and coverImage from req.files object
+    console.log("req.files : ", req.files);
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    //const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    // 
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path;
+    }
 
     if(!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required");
     }
 
+    // Upload avatar and coverImage on cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-
+    // Check if avatar is uploaded or not
     if(!avatar){
         throw new ApiError(400, "Avatar file is required");
     }
 
+    // create user object - create entry in DB
     const user = await User.create({
         fullName,
         avatar: avatar.url,
-        coverImage: coverImage?coverImage.url || "",
+        coverImage: coverImage?coverImage.url : '',
         email, 
         password,
-        userName: userName.toLowerCase()
+        username: userName.toLowerCase()
     })
 
+    // After user creation, _id is created automatically by MongoDB, we can use that to find the user and remove password and refreshToken field from response using '-' sign
     const createdUser = await User.findById(user._id).select("-password -refreshToken")
 
+    // if user is not created, throw error
     if(!createdUser){
         throw new ApiError(500, "Something went Wrong while registering the user");
     }
 
+    // if user is created, return response
     return res.status(201).json(
         new ApiResponse(200, createdUser, "User Registered Successfully")
     )

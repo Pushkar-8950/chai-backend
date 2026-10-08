@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
 // Defining user schema
 const UserSchema = new Schema({
@@ -58,7 +59,7 @@ UserSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, 10);
 
     //Tells Mongoose: "middleware is finished, continue saving the document"
-    next();
+    next;
 })
 
 // UserSchema.methods.isCorrectPassword -> Adds a method to every User document
