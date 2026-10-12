@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 // Defining user schema
 const UserSchema = new Schema({
@@ -26,7 +27,7 @@ const UserSchema = new Schema({
         trim: true,
         index: true
     },
-    avatar:{
+    avatarImage:{
         type: String, // cloudinary url
         required: true,
     },  
@@ -53,7 +54,7 @@ const UserSchema = new Schema({
 UserSchema.pre("save", async function (next) {
 
     // If password is not modified, skip hashing
-    if(!this.isModified("password")) return next();
+    if(!this.isModified("password")) return next;
 
     // Converts plain password into a bcrypt hash
     this.password = await bcrypt.hash(this.password, 10);
