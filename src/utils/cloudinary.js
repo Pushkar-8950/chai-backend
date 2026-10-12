@@ -1,5 +1,6 @@
 import {v2} from 'cloudinary';
 import fs from 'fs';
+import { loadEnvFile } from 'process';
 
 v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -18,16 +19,18 @@ const uploadOnCloudinary = async (localFilePath) => {
 
         // file uploaded successfully
         console.log(`File uploaded succesfully : `, response.url);
-        fs.unlinkSync(localFilePath); // remove the file from local storage after uploading it on cloudinary
         return response;
 
     } catch(err){
         
         // unlink the file from local storage if any error occurs to avoid trash files 
         console.log(`Error while uploading file on cloudinary : `, err);
-        fs.unlinkSync(localFilePath);
         return null;
+    } finally {
+        if(localFilePath && fs.existsSync(localFilePath)){
+            fs.unlinkSync(localFilePath); // remove the file from local storage after uploading it on cloudinary
+        }
     }
 }
 
-export {uploadOnCloudinary}
+export {uploadOnCloudinary};

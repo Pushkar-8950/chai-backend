@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, registerUser, logoutUser, refreshAccessToken } from "../controllers/user.controller.js";
+import { loginUser, registerUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateAvatarImage, updateCoverImage} from "../controllers/user.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 
@@ -26,7 +26,19 @@ userRouter.route('/login').post(loginUser);
 
 // We are using middleware to logout user successfully, so that we don't have to take any credentials from the user at logout time. We can verify it using access token and add a 'user' object in request using which we can get user _id for logging out the user
 userRouter.route('/logout').post(verifyJWT, logoutUser);
-userRouter.route('./refresh-token').post(refreshAccessToken);
-
+userRouter.route('/refresh-token').post(refreshAccessToken);
+userRouter.route('/change-password').post(verifyJWT, changeCurrentPassword);
+userRouter.route('/get-current-user').post(verifyJWT, getCurrentUser);
+userRouter.route('/update-account-details').post(verifyJWT, updateAccountDetails);
+userRouter.route('/update-avatar-image').post(
+    verifyJWT,
+    upload.single("avatarImage"),
+    updateAvatarImage
+);
+userRouter.route('/update-cover-image').post(
+    verifyJWT, 
+    upload.single("coverImage"),
+    updateCoverImage
+);
 
 export default userRouter;
